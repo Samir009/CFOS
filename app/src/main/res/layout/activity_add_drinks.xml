@@ -83,7 +83,7 @@
                         android:layout_width="30dp"
                         android:layout_height="30dp"
                         app:srcCompat="@drawable/ic_drinks"
-                        android:tint="@color/colorPrimary"/>
+                        app:tint="@color/colorPrimary" />
                     <EditText
                         android:id="@+id/selected_drinks_name"
                         android:layout_width="match_parent"
@@ -104,7 +104,7 @@
                         android:layout_width="30dp"
                         android:layout_height="30dp"
                         app:srcCompat="@drawable/ic_money"
-                        android:tint="@color/colorPrimary"/>
+                        app:tint="@color/colorPrimary" />
 
                     <EditText
                         android:id="@+id/selected_drinks_price"

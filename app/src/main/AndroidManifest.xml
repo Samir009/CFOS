@@ -7,7 +7,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.CAMERA" />
 
     <uses-feature
         android:name="android.hardware.camera"
@@ -22,10 +22,12 @@
         android:fullBackupContent="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:requestLegacyExternalStorage="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
+        <activity android:name=".activities.CaptureImageActivity"></activity>
 
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -35,44 +37,35 @@
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_provider_paths" />
-        </provider>
-
-        <!-- register firebase service -->
-<!--        <service-->
-<!--            android:name=".fcm.AndroidFirebaseMessagingService"-->
-<!--            android:permission="com.google.android.c2dm.permission.SEND">-->
-<!--            <intent-filter>-->
-<!--                <action android:name="com.google.firebase.MESSAGING_EVENT" />-->
-<!--                <action android:name="com.google.android.c2dm.intent.RECEIVE" />-->
-<!--            </intent-filter>-->
-<!--        </service>-->
-
+        </provider> <!-- register firebase service -->
+        <!-- <service -->
+        <!-- android:name=".fcm.AndroidFirebaseMessagingService" -->
+        <!-- android:permission="com.google.android.c2dm.permission.SEND"> -->
+        <!-- <intent-filter> -->
+        <!-- <action android:name="com.google.firebase.MESSAGING_EVENT" /> -->
+        <!-- <action android:name="com.google.android.c2dm.intent.RECEIVE" /> -->
+        <!-- </intent-filter> -->
+        <!-- </service> -->
         <service
             android:name=".fcm.AndroidFirebaseMessagingService"
-            android:permission="com.google.android.c2dm.permission.SEND"
-            android:exported="false">
+            android:exported="false"
+            android:permission="com.google.android.c2dm.permission.SEND">
             <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
-                <action android:name="com.google.android.c2dm.intent.RECEIVE"/>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
             </intent-filter>
-        </service>
-
-        <!-- Set custom default icon. This is used when no icon is set for incoming notification messages. -->
+        </service> <!-- Set custom default icon. This is used when no icon is set for incoming notification messages. -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
-            android:resource="@drawable/ic_baseline_notifications_active_24" />
-        <!-- Set color used with incoming notification messages. This is used when no color is set for the incoming -->
+            android:resource="@drawable/ic_baseline_notifications_active_24" /> <!-- Set color used with incoming notification messages. This is used when no color is set for the incoming -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_color"
             android:resource="@color/colorAccent" />
 
-
-
-
-        <activity android:name=".activities.EditProfileActivity"
+        <activity
+            android:name=".activities.EditProfileActivity"
             android:launchMode="singleTask"
-            android:parentActivityName=".activities.ProfileActivity"/>
-
+            android:parentActivityName=".activities.ProfileActivity" />
         <activity
             android:name=".activities.RegistrationActivity"
             android:launchMode="singleTask"
@@ -105,6 +98,8 @@
             android:parentActivityName=".activities.CanteenHomeActivity" />
         <activity
             android:name=".activities.AddDrinksActivity"
+            android:configChanges="orientation|screenLayout"
+            android:launchMode="singleTask"
             android:parentActivityName=".activities.CanteenHomeActivity" />
         <activity
             android:name=".activities.AddNonVegActivity"

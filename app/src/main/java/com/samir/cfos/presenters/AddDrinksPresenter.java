@@ -2,7 +2,9 @@ package com.samir.cfos.presenters;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.net.Uri;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 
@@ -33,6 +35,7 @@ import com.samir.cfos.helpers.ShowToast;
 import com.samir.cfos.models.FoodModel;
 import com.samir.cfos.utils.Utilities;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.Objects;
@@ -80,7 +83,14 @@ public class AddDrinksPresenter {
         return mime.getExtensionFromMimeType(cr.getType(uri));
     }
 
-    public void addDrinksDetails(Context con, String FoodName, String FoodPrice, Uri imgUri) {
+    public Uri getImageUri(Context inContext, Bitmap inImage) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+        String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), inImage, "Title", null);
+        return Uri.parse(path);
+    }
+
+    public void addDrinksDetails(Context con, String FoodName, String FoodPrice, Bitmap imgBit, String fileExt) {
 
         this.context = con;
 
@@ -114,56 +124,7 @@ public class AddDrinksPresenter {
 
                     } else {
 
-                        File compImg = new File(imgUri.getPath());
-
-                        String filePath = SiliCompressor.with(con).compress(imgUri.getPath(), compImg);
-
-                        Uri actualImg = Uri.parse(filePath);
-
-                        final File file = new File(SiliCompressor.with(con)
-                                .compress(FileUtils.getPath(con, imgUri), new File(con.getCacheDir(), "temp")));
-
-                        Uri uri = Uri.fromFile(file);
-
-                        //           creates name of image file
-                        StorageReference storageReference =  mStorageRef.child(FoodName + "." + getFileExtension(imgUri));
-                                storageReference.putFile(uri);
-
-                                /*use storage task to upload image */
-                        mUploadTask = storageReference.putFile(imgUri);
-
-                        /*retrieve img url from firebase*/
-                        Task urlTask = mUploadTask.continueWithTask((Continuation) task -> {
-                            if(!task.isSuccessful()){
-                                throw Objects.requireNonNull(task.getException());
-                            }
-                            return storageReference.getDownloadUrl();
-                        });
-
-                        urlTask.addOnCompleteListener(new OnCompleteListener() {
-                            @Override
-                            public void onComplete(@NonNull Task task) {
-                                if(task.isSuccessful()){
-
-                                    /*image download string lies here*/
-                                    Uri uriImg = (Uri) task.getResult();
-
-                                    assert uriImg != null;
-                                    Log.e("hurrey: ", uriImg.toString());
-
-                                    String s = collectionsReference.document().getId();
-
-                                    FoodModel foodModel = new FoodModel(s, FoodName, FoodPrice, uriImg.toString());
-                                    collectionsReference.document(FoodName).set(foodModel);
-                                    getView().onAddDrinksSuccess("uploaded successfully! :)");
-                                }
-                            }
-                        }).addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Log.e("Failed to get Url: ", e.getMessage());
-                            }
-                        });
+                        uploadImage(FoodName, FoodPrice, imgBit, fileExt);
 
                     }
                 }
@@ -173,5 +134,75 @@ public class AddDrinksPresenter {
 
     }
 
+    private void uploadImage(String foodName, String foodPrice, Bitmap bitmap, String imgExt) {
+
+        final StorageReference storageReference =  mStorageRef.child(foodName + "." + imgExt);
+//        final StorageReference ref = storageReference.child("drivers/" + UserDto.getId() + ".jpg");
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 20, baos);
+        byte[] data = baos.toByteArray();
+
+        mUploadTask = storageReference.putBytes(data);
+
+            /*retrieve img url from firebase*/
+            Task Task = mUploadTask.continueWithTask((Continuation) task -> {
+                if(!task.isSuccessful()){
+                    throw Objects.requireNonNull(task.getException());
+                }
+                return storageReference.getDownloadUrl();
+            });
+
+            Task.addOnCompleteListener(new OnCompleteListener() {
+                @Override
+                public void onComplete(@NonNull com.google.android.gms.tasks.Task task) {
+                    if(task.isSuccessful()){
+                        Uri imgUri = (Uri) task.getResult();
+                        Log.e(TAG, "hurrey" +  imgUri.toString());
+
+                        String s = collectionsReference.document().getId();
+
+                        FoodModel foodModel = new FoodModel(s, foodName, foodPrice, imgUri.toString());
+                        collectionsReference.document(foodName).set(foodModel);
+                        getView().onAddDrinksSuccess("uploaded successfully! :)");
+                    }
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    e.printStackTrace();
+                }
+            });
+
+
+//        uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+//            @Override
+//            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+//
+//                uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+//                    @Override
+//                    public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+//                        if (!task.isSuccessful()) {
+//                            throw task.getException();
+//                        }
+//                        return storageReference.getDownloadUrl();
+//                    }
+//                }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+//                    @Override
+//                    public void onComplete(@NonNull Task<Uri> task) {
+//                        if (task.isSuccessful()) {
+//                            Uri downUri = task.getResult();
+//                            Log.d("Final URL", "onComplete: Url: " + downUri.toString());
+//                        }
+//                    }
+//                });
+//            }
+//        }).addOnFailureListener(new OnFailureListener() {
+//            @Override
+//            public void onFailure(@NonNull Exception e) {
+//
+//            }
+//        });
+    }
 }
 

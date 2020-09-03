@@ -2,6 +2,8 @@ package com.samir.cfos.activities;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -13,6 +15,7 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
+import android.webkit.MimeTypeMap;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -23,9 +26,9 @@ import androidx.core.content.FileProvider;
 
 import com.anstrontechnologies.corehelper.AnstronCoreHelper;
 import com.bumptech.glide.Glide;
+import com.camerakit.CameraKitView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.iceteck.silicompressorr.FileUtils;
 import com.iceteck.silicompressorr.SiliCompressor;
 import com.samir.cfos.R;
 import com.samir.cfos.databinding.ActivityAddDrinksBinding;
@@ -34,6 +37,8 @@ import com.samir.cfos.helpers.ShowToast;
 
 import com.samir.cfos.presenters.AddDrinksPresenter;
 
+import com.samir.cfos.utils.FileUtils;
+import com.samir.cfos.utils.ImageFilePath;
 import com.samir.cfos.utils.UtilitiesFunctions;
 
 import org.jetbrains.annotations.NotNull;
@@ -58,12 +63,11 @@ public class  AddDrinksActivity extends AppCompatActivity implements AddDrinksPr
     private ActivityAddDrinksBinding binding;
     private AddDrinksPresenter addDrinksPresenter;
 
-//    StorageReference storageReference;
-
     private Uri mImageUri;
     File photoFile = null;
     String mCurrentPhotoPath = "";
     Bitmap mBitmap;
+    String imgExt;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,16 +99,24 @@ public class  AddDrinksActivity extends AppCompatActivity implements AddDrinksPr
 
     }
 
+    //    get file extension from selected file
+    private String getFileExtension(Uri uri) {
+        ContentResolver cr = this.getContentResolver();
+        MimeTypeMap mime = MimeTypeMap.getSingleton();
+        return mime.getExtensionFromMimeType(cr.getType(uri));
+    }
+
     //    check whether fields are empty or not
     private void checkEmptyFields() {
+
         if (binding.selectedDrinksName.getText().toString().equals("")
-                | binding.selectedDrinksPrice.getText().toString().equals("") | mImageUri == null) {
+                | binding.selectedDrinksPrice.getText().toString().equals("") | mBitmap == null) {
             ShowToast.withLongMessage("Fields or image may be empty");
 
         } else {
             showProgressBar();
             addDrinksPresenter.addDrinksDetails(this, binding.selectedDrinksName.getText().toString(),
-                    binding.selectedDrinksPrice.getText().toString(), mImageUri);
+                    binding.selectedDrinksPrice.getText().toString(), mBitmap, imgExt);
 
         }
     }
@@ -266,7 +278,7 @@ public class  AddDrinksActivity extends AppCompatActivity implements AddDrinksPr
 
         if (requestCode == REQUEST_CAMERA_PERMISSION) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//                dispatchTakePictureIntent();
+                dispatchTakePictureIntent();
 
             } else {
                 Toast.makeText(this, "Camera permission not granted", Toast.LENGTH_SHORT).show();
@@ -281,26 +293,38 @@ public class  AddDrinksActivity extends AppCompatActivity implements AddDrinksPr
         }
     }
 
-    //    when activity is performed after giving permission
+    /*when activity is performed after giving permission*/
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-//        Glide.with(getApplicationContext()).load(mImageUri).into(binding.drinksImg);
-        binding.drinksImg.setImageURI(mImageUri);
         if (resultCode == RESULT_OK && null != data) {
             if (requestCode == REQUEST_STORAGE_PERMISSION) {
 
-//                mImageUri = data.getData();
-//                String imgPath = mImageUri.getPath();
-
-//                set Selected image uri
+                /*set Selected image uri*/
                 mImageUri = data.getData();
-                Glide.with(MyApplication.getAppContext()).load(mImageUri).into(binding.drinksImg);
-//                binding.drinksImg.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+
+                /*convert uriData to bitmap*/
+                try
+                {
+                    mBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver() , mImageUri);
+                    Glide.with(MyApplication.getAppContext()).load(mBitmap).into(binding.drinksImg);
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+
+                /*get the extension of selected image*/
+                imgExt = getFileExtension(mImageUri);
+                Log.e("FileExtension: ", imgExt);
+
+                /*actual file location*/
+                String imgPath = ImageFilePath.getPath(this, mImageUri);
+                Log.e("actual path:", "\t"+ imgPath);
+
 
             } else if (requestCode == REQUEST_CAMERA_PERMISSION) {
-
 
                 Log.e("cameraRequest: ", "after capturing img, it is redirected to onActivityResult");
 
@@ -310,6 +334,32 @@ public class  AddDrinksActivity extends AppCompatActivity implements AddDrinksPr
             Log.e("onActivityResult: ",  "data may be empty or permission not given or other errors");
         }
     }
+
+/*    public Bitmap resizeBitmap(String photoPath, int targetW, int targetH) {
+        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+        bmOptions.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(photoPath, bmOptions);
+        int photoW = bmOptions.outWidth;
+        int photoH = bmOptions.outHeight;
+
+        int scaleFactor = 1;
+        if ((targetW > 0) || (targetH > 0)) {
+            scaleFactor = Math.min(photoW/targetW, photoH/targetH);
+        }
+
+        bmOptions.inJustDecodeBounds = false;
+        bmOptions.inSampleSize = scaleFactor;
+        bmOptions.inPurgeable = true; //Deprecated API 21
+
+        return BitmapFactory.decodeFile(photoPath, bmOptions);
+    }*/
+
+/*    public Uri getImageUri(Context inContext, Bitmap inImage) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        inImage.compress(Bitmap.CompressFormat.JPEG, 80, bytes);
+        String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), inImage, "Title", null);
+        return Uri.parse(path);
+    }*/
 
     @Override
     public void onClick(View v) {
