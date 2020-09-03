@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "689045226391",
+    "firebase_url": "https://canteen-food-ordering-sy-4efc2.firebaseio.com",
+    "project_id": "canteen-food-ordering-sy-4efc2",
+    "storage_bucket": "canteen-food-ordering-sy-4efc2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:689045226391:android:5a5681a7d925a21d7c7ad2",
+        "android_client_info": {
+          "package_name": "com.samir.cfos"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "689045226391-n8lcgv8gc3g3p79pj77h7l5skj5nnlim.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDPPCojQNcTt3sbFvfrfq8uk8NNuri0TYA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "689045226391-n8lcgv8gc3g3p79pj77h7l5skj5nnlim.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

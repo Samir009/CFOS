@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">CFOS</string>
+
+
+    <string name="open">Open</string>
+    <string name="close">Close</string>
+    <string name="error">Error</string>
+    <string name="delete">delete</string>
+    <string name="male">male</string>
+    <string name="female">female</string>
+    <string name="gender">Gender</string>
+    <string name="password">Password</string>
+    <string name="default_notification_channel_id">1100</string>
+
+    <!--    <string name="dayTheme">Day Theme</string>-->
+    <!--    <string name="nightTheme">Night Theme</string>-->
+    <!--    <string name="automaticTheme">Automatic Theme</string>-->
+
+</resources>

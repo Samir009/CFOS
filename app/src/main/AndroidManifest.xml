@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.samir.cfos">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.CAMERA"/>
+
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="true" />
+    <uses-feature android:name="android.hardware.camera.autofocus" />
+
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
+
+    <application
+        android:name=".helpers.MyApplication"
+        android:allowBackup="true"
+        android:fullBackupContent="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme"
+        tools:ignore="GoogleAppIndexingWarning">
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.samir.cfos.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_provider_paths" />
+        </provider>
+
+        <!-- register firebase service -->
+<!--        <service-->
+<!--            android:name=".fcm.AndroidFirebaseMessagingService"-->
+<!--            android:permission="com.google.android.c2dm.permission.SEND">-->
+<!--            <intent-filter>-->
+<!--                <action android:name="com.google.firebase.MESSAGING_EVENT" />-->
+<!--                <action android:name="com.google.android.c2dm.intent.RECEIVE" />-->
+<!--            </intent-filter>-->
+<!--        </service>-->
+
+        <service
+            android:name=".fcm.AndroidFirebaseMessagingService"
+            android:permission="com.google.android.c2dm.permission.SEND"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE"/>
+            </intent-filter>
+        </service>
+
+        <!-- Set custom default icon. This is used when no icon is set for incoming notification messages. -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_baseline_notifications_active_24" />
+        <!-- Set color used with incoming notification messages. This is used when no color is set for the incoming -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/colorAccent" />
+
+
+
+
+        <activity android:name=".activities.EditProfileActivity"
+            android:launchMode="singleTask"
+            android:parentActivityName=".activities.ProfileActivity"/>
+
+        <activity
+            android:name=".activities.RegistrationActivity"
+            android:launchMode="singleTask"
+            android:parentActivityName=".activities.LoginActivity" />
+        <activity
+            android:name=".activities.LoginActivity"
+            android:launchMode="singleTask">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".activities.ProfileActivity"
+            android:launchMode="singleTask"
+            android:parentActivityName=".activities.CanteenHomeActivity" />
+        <activity
+            android:name=".activities.TotalOrderedFoodDetailsActivity"
+            android:launchMode="singleTask"
+            android:parentActivityName=".activities.TotalOrderedFoodActivity" />
+        <activity android:name=".activities.CanteenHomeActivity" />
+        <activity
+            android:name=".activities.GuestOrderDetailsActivity"
+            android:launchMode="singleTask"
+            android:parentActivityName=".activities.GuestOrdersActivity" />
+        <activity
+            android:name=".activities.GuestOrdersActivity"
+            android:launchMode="singleTask"
+            android:parentActivityName=".activities.CanteenHomeActivity" />
+        <activity
+            android:name=".activities.AddDrinksActivity"
+            android:parentActivityName=".activities.CanteenHomeActivity" />
+        <activity
+            android:name=".activities.AddNonVegActivity"
+            android:launchMode="singleTask"
+            android:parentActivityName=".activities.CanteenHomeActivity" />
+        <activity
+            android:name=".activities.AddVegActivity"
+            android:launchMode="singleTask"
+            android:parentActivityName=".activities.CanteenHomeActivity" />
+        <activity
+            android:name=".activities.TotalOrderedFoodActivity"
+            android:launchMode="singleTask"
+            android:parentActivityName=".activities.CanteenHomeActivity" />
+    </application>
+
+</manifest>
