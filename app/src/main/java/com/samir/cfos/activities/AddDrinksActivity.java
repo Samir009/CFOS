@@ -1,6 +1,7 @@
 package com.samir.cfos.activities;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -133,7 +134,7 @@ public class  AddDrinksActivity extends AppCompatActivity implements AddDrinksPr
                         && ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                         == PackageManager.PERMISSION_GRANTED ){
 
-//                    dispatchTakePictureIntent();
+                    dispatchTakePictureIntent();
 
                 } else {
                     requestCameraPermission();
@@ -156,51 +157,27 @@ public class  AddDrinksActivity extends AppCompatActivity implements AddDrinksPr
     //    open camera
     private void dispatchTakePictureIntent() {
 
-        Log.e( "dispatchTakePicIntent: ", "Camera called");
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
 
             photoFile = null;
-//            photoFile = createImageFile();
+            photoFile = createImageFile();
 
             Log.e("dispatchTakePicIntent: ", photoFile.getAbsolutePath());
 
-            mImageUri = FileProvider.getUriForFile(this,
-                    "com.samir.cfos.fileprovider",
-                    photoFile);
-
-//            compressImage(mImageUri, mCurrentPhotoPath);
-
-            Log.e("disPicIntent: ", Objects.requireNonNull(mImageUri.getPath()));
+            if(photoFile != null){
+                mImageUri = null;
+                mImageUri = FileProvider.getUriForFile(this,
+                        "com.samir.fileprovider",
+                        photoFile);
+            } else {
+                Log.e("disTakePicIntent: ", "photo file is null");
+            }
 
             takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mImageUri);
-//            takePictureIntent.putExtra("return-data", true);
             startActivityForResult(takePictureIntent, REQUEST_CAMERA_PERMISSION);
 
-        }
-    }
-
-    public class BackgroundImageResize extends AsyncTask<Uri, Integer, byte[]>{
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            ShowToast.withLongMessage("Compressing Image");
-            Log.e("onPreExecute: ", "Compressing Image");
-        }
-
-        @Override
-        protected byte[] doInBackground(Uri... uris) {
-            Log.e("doInBackground: ", "started");
-
-            return new byte[0];
-        }
-
-
-        @Override
-        protected void onPostExecute(byte[] bytes) {
-            super.onPostExecute(bytes);
         }
     }
 
@@ -278,6 +255,7 @@ public class  AddDrinksActivity extends AppCompatActivity implements AddDrinksPr
 
         if (requestCode == REQUEST_CAMERA_PERMISSION) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
                 dispatchTakePictureIntent();
 
             } else {
@@ -298,10 +276,11 @@ public class  AddDrinksActivity extends AppCompatActivity implements AddDrinksPr
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (resultCode == RESULT_OK && null != data) {
+        if (resultCode == Activity.RESULT_OK ) {
             if (requestCode == REQUEST_STORAGE_PERMISSION) {
 
                 /*set Selected image uri*/
+                assert data != null;
                 mImageUri = data.getData();
 
                 /*convert uriData to bitmap*/
@@ -326,8 +305,8 @@ public class  AddDrinksActivity extends AppCompatActivity implements AddDrinksPr
 
             } else if (requestCode == REQUEST_CAMERA_PERMISSION) {
 
+                Glide.with(MyApplication.getAppContext()).load(mImageUri).into(binding.drinksImg);
                 Log.e("cameraRequest: ", "after capturing img, it is redirected to onActivityResult");
-
             }
 
         } else {
